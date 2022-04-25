@@ -39,7 +39,7 @@ router.post('/getUserByUID', (req, res) => {
     })
 })
 
-router.post('/updateUserByUID', (req, res) =>{
+router.patch('/updateUserByUID', (req, res) =>{
     const uid = req.body.uid
     const newUser = new User(req.body.uid,
         req.body.email,
