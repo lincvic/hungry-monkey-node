@@ -19,6 +19,12 @@ class UserDAO{
         const doc = ref.doc(uid.toString())
         return await doc.set(util.parseJSON(User))
     }
+
+    async getUserByRole(role){
+        const doc = ref.where('role', '==', role.toString())
+        return await doc.get()
+    }
+
 }
 
 module.exports = UserDAO

@@ -67,6 +67,31 @@ router.patch('/updateUserByUID', (req, res) =>{
     })
 })
 
+router.post("/getUserByRole", (req, res)=>{
+    const role = req.body.role
+    DAO.getUserByRole(role).then((it)=>{
+        if (!it.empty){
+            const userList = []
+            it.forEach((doc)=>{
+                userList.push(doc.data())
+            })
+            res.json(userList)
+        }else{
+            res.status(400).json({
+                result: false,
+                msg: `User get failed`
+            })
+        }
+
+    }).catch((err)=>{
+        console.log(err.message)
+        res.status(400).json({
+            result: false,
+            msg: `User get failed`
+        })
+    })
+})
+
 
 
 module.exports = router
