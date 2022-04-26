@@ -34,6 +34,15 @@ class RestaurantDAO{
         return await doc.set(util.parseJSON(Rest))
     }
 
+    async updateRestaurantStatus(id, status){
+        const doc = ref.doc(id.toString())
+        return await doc.update({status: status.toString()})
+    }
+
+    async getAllRestaurantByStatus(status){
+        return await ref.where('status', '==', status.toString()).get()
+    }
+
 }
 
 module.exports = RestaurantDAO

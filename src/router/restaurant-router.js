@@ -86,7 +86,7 @@ router.post('/getRestaurantByName', (req, res) => {
     })
 })
 
-router.post('/getAllRestaurant', (req, res) =>{
+router.get('/getAllRestaurant', (req, res) =>{
     DAO.getAllRestaurant().then((docSnapshot) =>{
         if (!docSnapshot.empty){
             const docList = []
@@ -97,7 +97,7 @@ router.post('/getAllRestaurant', (req, res) =>{
         }else{
             res.status(400).json({
                 result: false,
-                msg: `Restaurant is not empty`
+                msg: `Restaurant is empty`
             })
         }
     }).catch(err => {
@@ -130,6 +130,47 @@ router.patch('/updateRestaurant', (req, res) => {
         res.status(400).json({
             result: false,
             msg: `Restaurant ${newRest.name} update failed`
+        })
+    })
+})
+
+router.patch("/updateRestaurantStatus", (req, res)=>{
+    const restID = req.body.restaurant_id
+    const status = req.body.status
+    DAO.updateRestaurantStatus(restID, status).then(()=>{
+        res.status(200).json({
+            result: true,
+            msg: `Restaurant ${restID} updated to status ${status}`
+        })
+    }).catch((err)=>{
+        console.log(err.message)
+        res.status(400).json({
+            result: true,
+            msg: `Restaurant ${restID} updated failed`
+        })
+    })
+})
+
+router.post('/getAllRestaurantByStatus', (req, res) =>{
+    const status = req.body.status
+    DAO.getAllRestaurantByStatus(status).then((docSnapshot) =>{
+        if (!docSnapshot.empty){
+            const docList = []
+            docSnapshot.forEach((item) =>{
+                docList.push(item.data())
+            })
+            res.json(docList)
+        }else{
+            res.status(400).json({
+                result: false,
+                msg: `Restaurant is empty`
+            })
+        }
+    }).catch(err => {
+        console.log(err.message)
+        res.status(400).json({
+            result: false,
+            msg: `Firebase Error`
         })
     })
 })
