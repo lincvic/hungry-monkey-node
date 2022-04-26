@@ -1,5 +1,5 @@
 const CONFIG = {
-    port: 8888
+    port: process.env.PORT || 8888
 }
 
 const firebaseConfig = {
