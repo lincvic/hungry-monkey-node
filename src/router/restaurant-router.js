@@ -6,40 +6,42 @@ const DAO = new restDAO()
 
 router.post('/createNewRestaurant', (req, res) => {
     const newRest = new Restaurant(
-        req.body.id,
+        req.body.restaurant_id,
         req.body.name,
         req.body.description,
         req.body.location,
         req.body.open_time,
         req.body.close_time,
-        "WaitConfirm"
+        "WaitConfirm",
+        req.body.owner
     )
 
-    if (!DAO.checkRestaurantNameExist(newRest.name)){
-        DAO.createRestaurant(newRest).then(() => {
-            res.status(200).json({
-                result: true,
-                msg: `Restaurant ${newRest.name} created`
+    DAO.checkRestaurantNameExist(newRest.name).then((it)=>{
+        if (it.empty){
+            DAO.createRestaurant(newRest).then(() => {
+                res.status(200).json({
+                    result: true,
+                    msg: `Restaurant ${newRest.name} created`
+                })
+            }).catch(err => {
+                console.log(err.message)
+                res.status(400).json({
+                    result: false,
+                    msg: `Restaurant ${newRest.name} create failed`
+                })
             })
-        }).catch(err => {
-            console.log(err.message)
+        }else{
             res.status(400).json({
                 result: false,
-                msg: `Restaurant ${newRest.name} create failed`
+                msg: `Restaurant ${newRest.name} already exist`
             })
-        })
-    }else{
-        res.status(400).json({
-            result: false,
-            msg: `Restaurant ${newRest.name} already exist`
-        })
-    }
-
+        }
+    })
 
 })
 
 router.post('/getRestaurantByID', (req, res) => {
-    const id = req.body.id
+    const id = req.body.restaurant_id
     DAO.getRestaurantByID(id).then((docSnapshot) => {
         if (docSnapshot.data()){
             console.log(docSnapshot.data())
@@ -109,13 +111,14 @@ router.post('/getAllRestaurant', (req, res) =>{
 
 router.patch('/updateRestaurant', (req, res) => {
     const newRest = new Restaurant(
-        req.body.id,
+        req.body.restaurant_id,
         req.body.name,
         req.body.description,
         req.body.location,
         req.body.open_time,
         req.body.close_time,
-        req.body.status
+        req.body.status,
+        req.body.owner
     )
     DAO.updateRestaurantByID(req.body.id, newRest).then(() => {
         res.status(200).json({

@@ -15,6 +15,12 @@ class MenuDAO{
         return await doc.get()
     }
 
+    async checkFoodIDExist(restaurantID, foodID) {
+        const doc = this.refBuilder(restaurantID).doc(foodID.toString())
+        return await doc.get()
+    }
+
+
     async addNewFood(restaurantID, Food){
         const document = this.refBuilder(restaurantID)
         return await document.doc(Food.food_id.toString()).set(util.parseJSON(Food))
@@ -23,6 +29,16 @@ class MenuDAO{
     async updateFood(restaurantID, Food){
         const document = this.refBuilder(restaurantID)
         return await document.doc(Food.food_id.toString()).set(util.parseJSON(Food))
+    }
+
+    async getAllFoodByRestaurantID(restaurantID){
+        const document = this.refBuilder(restaurantID)
+        return await document.get()
+    }
+
+    async deleteFoodByFoodID(restaurantID, foodID){
+        const document = this.refBuilder(restaurantID)
+        return await document.doc(foodID.toString()).delete()
     }
 
 }

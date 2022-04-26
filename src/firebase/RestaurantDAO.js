@@ -7,9 +7,7 @@ class RestaurantDAO{
 
     async checkRestaurantNameExist(name) {
         const doc = ref.where('name', '==', name.toString())
-        doc.get().then((docSnapshot) =>{
-            return !docSnapshot.empty;
-        })
+        return await doc.get()
     }
 
     async createRestaurant(Rest){
