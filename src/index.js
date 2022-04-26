@@ -9,6 +9,7 @@ app.use(express.urlencoded({extended:false}))
 
 app.use('/api/user/', require('./router/user-router'))
 app.use('/api/restaurant/', require('./router/restaurant-router'))
+app.use('/api/restaurant/menu', require('./router/menu-router'))
 
 app.get("/", (req, res) => {
     req.log.info('Request get')

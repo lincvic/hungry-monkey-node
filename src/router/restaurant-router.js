@@ -14,24 +14,35 @@ router.post('/createNewRestaurant', (req, res) => {
         req.body.close_time,
         "WaitConfirm"
     )
-    DAO.createRestaurant(newRest).then(() => {
-        res.status(200).json({
-            result: true,
-            msg: `Restaurant ${newRest.name} created`
+
+    if (!DAO.checkRestaurantNameExist(newRest.name)){
+        DAO.createRestaurant(newRest).then(() => {
+            res.status(200).json({
+                result: true,
+                msg: `Restaurant ${newRest.name} created`
+            })
+        }).catch(err => {
+            console.log(err.message)
+            res.status(400).json({
+                result: false,
+                msg: `Restaurant ${newRest.name} create failed`
+            })
         })
-    }).catch(err => {
-        console.log(err.message)
+    }else{
         res.status(400).json({
             result: false,
-            msg: `Restaurant ${newRest.name} create failed`
+            msg: `Restaurant ${newRest.name} already exist`
         })
-    })
+    }
+
+
 })
 
 router.post('/getRestaurantByID', (req, res) => {
     const id = req.body.id
     DAO.getRestaurantByID(id).then((docSnapshot) => {
         if (docSnapshot.data()){
+            console.log(docSnapshot.data())
             res.json(docSnapshot.data())
         }else{
             res.status(400).json({

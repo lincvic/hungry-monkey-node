@@ -5,6 +5,13 @@ const util = new commonUtil()
 
 class RestaurantDAO{
 
+    async checkRestaurantNameExist(name) {
+        const doc = ref.where('name', '==', name.toString())
+        doc.get().then((docSnapshot) =>{
+            return !docSnapshot.empty;
+        })
+    }
+
     async createRestaurant(Rest){
         const doc = ref.doc(Rest.id.toString())
         return await doc.set(util.parseJSON(Rest))
