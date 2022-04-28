@@ -3,6 +3,9 @@ const router = express.Router()
 const restDAO = require('../firebase/RestaurantDAO')
 const Restaurant = require('../firebase/DTO/Restaurant')
 const DAO = new restDAO()
+const utilClass = require("../util/common-util")
+const util = new utilClass()
+const config = require("../CONFIG")
 
 router.post('/createNewRestaurant', (req, res) => {
     const newRest = new Restaurant(
@@ -16,13 +19,17 @@ router.post('/createNewRestaurant', (req, res) => {
         req.body.owner
     )
 
-    DAO.checkRestaurantNameExist(newRest.name).then((it)=>{
-        if (it.empty){
+    DAO.checkRestaurantNameExist(newRest.name).then((it) => {
+        if (it.empty) {
             DAO.createRestaurant(newRest).then(() => {
+                if (config.notificationStatus) {
+                    util.sendEmail2Manager(config.managerEmail, newRest.name)
+                }
                 res.status(200).json({
                     result: true,
                     msg: `Restaurant ${newRest.name} created`
                 })
+
             }).catch(err => {
                 console.log(err.message)
                 res.status(400).json({
@@ -30,7 +37,7 @@ router.post('/createNewRestaurant', (req, res) => {
                     msg: `Restaurant ${newRest.name} create failed`
                 })
             })
-        }else{
+        } else {
             res.status(400).json({
                 result: false,
                 msg: `Restaurant ${newRest.name} already exist`
@@ -43,10 +50,10 @@ router.post('/createNewRestaurant', (req, res) => {
 router.post('/getRestaurantByID', (req, res) => {
     const id = req.body.restaurant_id
     DAO.getRestaurantByID(id).then((docSnapshot) => {
-        if (docSnapshot.data()){
+        if (docSnapshot.data()) {
             console.log(docSnapshot.data())
             res.json(docSnapshot.data())
-        }else{
+        } else {
             res.status(400).json({
                 result: false,
                 msg: `Restaurant ${id} is not exist`
@@ -64,14 +71,14 @@ router.post('/getRestaurantByID', (req, res) => {
 
 router.post('/getRestaurantByName', (req, res) => {
     const name = req.body.name
-    DAO.getRestaurantByName(name).then((docSnapshot) =>{
-        if (!docSnapshot.empty){
+    DAO.getRestaurantByName(name).then((docSnapshot) => {
+        if (!docSnapshot.empty) {
             const docList = []
-            docSnapshot.forEach((item) =>{
+            docSnapshot.forEach((item) => {
                 docList.push(item.data())
             })
             res.json(docList)
-        }else{
+        } else {
             res.status(400).json({
                 result: false,
                 msg: `Restaurant ${name} is not exist`
@@ -86,15 +93,15 @@ router.post('/getRestaurantByName', (req, res) => {
     })
 })
 
-router.get('/getAllRestaurant', (req, res) =>{
-    DAO.getAllRestaurant().then((docSnapshot) =>{
-        if (!docSnapshot.empty){
+router.get('/getAllRestaurant', (req, res) => {
+    DAO.getAllRestaurant().then((docSnapshot) => {
+        if (!docSnapshot.empty) {
             const docList = []
-            docSnapshot.forEach((item) =>{
+            docSnapshot.forEach((item) => {
                 docList.push(item.data())
             })
             res.json(docList)
-        }else{
+        } else {
             res.status(400).json({
                 result: false,
                 msg: `Restaurant is empty`
@@ -134,15 +141,15 @@ router.patch('/updateRestaurant', (req, res) => {
     })
 })
 
-router.patch("/updateRestaurantStatus", (req, res)=>{
+router.patch("/updateRestaurantStatus", (req, res) => {
     const restID = req.body.restaurant_id
     const status = req.body.status
-    DAO.updateRestaurantStatus(restID, status).then(()=>{
+    DAO.updateRestaurantStatus(restID, status).then(() => {
         res.status(200).json({
             result: true,
             msg: `Restaurant ${restID} updated to status ${status}`
         })
-    }).catch((err)=>{
+    }).catch((err) => {
         console.log(err.message)
         res.status(400).json({
             result: true,
@@ -151,16 +158,16 @@ router.patch("/updateRestaurantStatus", (req, res)=>{
     })
 })
 
-router.post('/getAllRestaurantByStatus', (req, res) =>{
+router.post('/getAllRestaurantByStatus', (req, res) => {
     const status = req.body.status
-    DAO.getAllRestaurantByStatus(status).then((docSnapshot) =>{
-        if (!docSnapshot.empty){
+    DAO.getAllRestaurantByStatus(status).then((docSnapshot) => {
+        if (!docSnapshot.empty) {
             const docList = []
-            docSnapshot.forEach((item) =>{
+            docSnapshot.forEach((item) => {
                 docList.push(item.data())
             })
             res.json(docList)
-        }else{
+        } else {
             res.status(400).json({
                 result: false,
                 msg: `Restaurant is empty`
@@ -174,8 +181,6 @@ router.post('/getAllRestaurantByStatus', (req, res) =>{
         })
     })
 })
-
-
 
 
 module.exports = router

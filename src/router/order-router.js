@@ -1,12 +1,15 @@
 const express = require('express')
 const router = express.Router()
-const restDAO = require('../firebase/OrderDAO')
+const orderDAO = require('../firebase/OrderDAO')
 const usersDAO = require('../firebase/UserDAO')
+const restDAOClass = require('../firebase/RestaurantDAO')
 const Order = require('../firebase/DTO/Order')
-const DAO = new restDAO()
+const DAO = new orderDAO()
 const userDAO = new usersDAO()
+const restDAO = new restDAOClass()
 const commonUtil = require('../util/common-util')
 const util = new commonUtil()
+const config = require('../CONFIG')
 
 router.post('/placeNewOrder', (req, res) => {
 
@@ -26,6 +29,17 @@ router.post('/placeNewOrder', (req, res) => {
         )
 
         DAO.placeNewOrder(newOrder).then(() => {
+            if (config.notificationStatus){
+                restDAO.getRestaurantByName(newOrder.restaurant_name).then((it)=>{
+                    const list = []
+                    it.forEach((doc)=>{
+                        list.push(doc.data())
+                    })
+                    const email = list[0].owner
+                    console.log(`Rest ! name is ${email}`)
+                    util.sendEmail2RestaurantOwner(email)
+                })
+            }
             res.status(200).json({
                 result: true,
                 msg: `Order ${newOrder.order_id} Placed`
@@ -122,6 +136,9 @@ router.patch("/assignOrder2Deliver", (req, res)=>{
     const deliverEmail = req.body.order_deliver_by
     DAO.assignOrderDeliver(orderID, deliverEmail).then(()=>{
         DAO.updateOrderStatus(orderID, "delivering").then(()=>{
+            if (config.notificationStatus){
+                util.sendEmail2Driver(deliverEmail)
+            }
             res.status(200).json({
                 result: true,
                 msg: `Order ${orderID} assign to ${deliverEmail}`

@@ -11,7 +11,7 @@ class RestaurantDAO{
     }
 
     async createRestaurant(Rest){
-        const doc = ref.doc(Rest.id.toString())
+        const doc = ref.doc(Rest.restaurant_id.toString())
         return await doc.set(util.parseJSON(Rest))
     }
 

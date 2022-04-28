@@ -18,6 +18,6 @@ app.get("/", (req, res) => {
     res.send("Server Started!")
 })
 
-app.listen(config.CONFIG.port, () => {
-    console.log(`Server start at port ${config.CONFIG.port}`)
+app.listen(config.port, () => {
+    console.log(`Server start at port ${config.port}`)
 })
