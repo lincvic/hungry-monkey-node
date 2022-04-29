@@ -183,5 +183,16 @@ router.post('/getAllRestaurantByStatus', (req, res) => {
     })
 })
 
+router.post('/getRestaurantImage', (req, res) => {
+    const restID = req.body.restaurant_id
+    DAO.getRestaurantImage(restID).then((url)=>{
+        res.status(200).json({
+            url: url[0]
+        })
+    })
+
+
+})
+
 
 module.exports = router

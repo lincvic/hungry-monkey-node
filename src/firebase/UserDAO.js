@@ -1,5 +1,5 @@
 const db = require('./firebase')
-const ref = db.collection('Users')
+const ref = db.db.collection('Users')
 const commonUtil = require('../util/common-util')
 const util = new commonUtil()
 
