@@ -7,6 +7,7 @@ const DAO = new menuDAO()
 const restaurantDAO = new restDAO()
 const commonUtil = require('../util/common-util')
 const util = new commonUtil()
+const uuid = require('uuid')
 
 router.post('/createNewFood', (req, res) => {
     const restID = req.body.restaurant_id
@@ -15,13 +16,13 @@ router.post('/createNewFood', (req, res) => {
             restaurantDAO.getRestaurantByID(restID).then((docSnapshot) => {
                 const restName = util.parseJSON(docSnapshot.data())
                 const newFood = new Food(
-                    req.body.food_id,
+                    uuid.v4(),
                     req.body.food_name,
                     req.body.food_price,
                     req.body.food_description,
-                    restName.name
+                    restName.name,
+                    req.body.food_type
                 )
-
                 DAO.addNewFood(restID, newFood).then(() => {
                     res.status(200).json({
                         result: true,
@@ -60,7 +61,8 @@ router.patch('/updateFood', (req, res) => {
             req.body.food_name,
             req.body.food_price,
             req.body.food_description,
-            restName.name
+            restName.name,
+            req.body.food_type
         )
 
         DAO.updateFood(restID, newFood).then(() => {

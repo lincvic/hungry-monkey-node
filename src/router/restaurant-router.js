@@ -6,10 +6,11 @@ const DAO = new restDAO()
 const utilClass = require("../util/common-util")
 const util = new utilClass()
 const config = require("../CONFIG")
+const uuid = require('uuid')
 
 router.post('/createNewRestaurant', (req, res) => {
     const newRest = new Restaurant(
-        req.body.restaurant_id,
+        uuid.v4(),
         req.body.name,
         req.body.description,
         req.body.location,

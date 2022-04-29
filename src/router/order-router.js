@@ -10,13 +10,14 @@ const restDAO = new restDAOClass()
 const commonUtil = require('../util/common-util')
 const util = new commonUtil()
 const config = require('../CONFIG')
+const uuid = require('uuid')
 
 router.post('/placeNewOrder', (req, res) => {
 
     userDAO.getUserByUID(req.body.user_uid).then((it) => {
         const user = util.parseJSON(it.data())
         const newOrder = new Order(
-            req.body.order_id,
+            uuid.v4(),
             req.body.user_uid,
             user.email,
             req.body.restaurant_name,
