@@ -11,6 +11,18 @@ const uuid = require('uuid')
 
 router.post('/createNewFood', (req, res) => {
     const restID = req.body.restaurant_id
+    if (!restID||
+        !req.body.food_name||
+        !req.body.food_price||
+        !req.body.food_description||
+        !req.body.food_type
+    ){
+        console.log(`Input error`)
+        res.status(400).json({
+            result: false,
+            msg: `Input error`
+        })
+    }
     DAO.checkFoodNameExist(restID, req.body.food_name).then((it) => {
         if (it.empty) {
             restaurantDAO.getRestaurantByID(restID).then((docSnapshot) => {
@@ -53,6 +65,13 @@ router.post('/createNewFood', (req, res) => {
 router.patch('/updateFood', (req, res) => {
 
     const restID = req.body.restaurant_id
+    if (!restID){
+        console.log(`Input error`)
+        res.status(400).json({
+            result: false,
+            msg: `Input error`
+        })
+    }
 
     restaurantDAO.getRestaurantByID(restID).then((docSnapshot) => {
         const restName = util.parseJSON(docSnapshot.data())
@@ -87,6 +106,13 @@ router.patch('/updateFood', (req, res) => {
 
 router.post('/getAllFoodByRestaurantID', (req, res)=>{
     const restID = req.body.restaurant_id
+    if (!restID){
+        console.log(`Input error`)
+        res.status(400).json({
+            result: false,
+            msg: `Input error`
+        })
+    }
     DAO.getAllFoodByRestaurantID(restID).then((docSnapshot) =>{
         if(docSnapshot){
             const foodList = []
@@ -106,6 +132,22 @@ router.post('/getAllFoodByRestaurantID', (req, res)=>{
 router.delete('/deleteFood', (req,res)=>{
     const restID = req.body.restaurant_id
     const foodID = req.body.food_id
+
+    if (!restID || !foodID){
+        console.log(`Input error`)
+        res.status(400).json({
+            result: false,
+            msg: `Input error`
+        })
+    }
+
+    if (!restID || !foodID){
+        console.log(`Input error`)
+        res.status(400).json({
+            result: false,
+            msg: `Input error`
+        })
+    }
 
     DAO.checkFoodIDExist(restID, foodID).then((docSnapshot)=>{
         if(docSnapshot.data()){

@@ -9,6 +9,19 @@ const config = require("../CONFIG")
 const uuid = require('uuid')
 
 router.post('/createNewRestaurant', (req, res) => {
+    if(!req.body.name||
+    !req.body.description||
+    !req.body.location||
+    !req.body.open_time||
+    !req.body.close_time||
+    !req.body.owner){
+        console.log(`Input error`)
+        res.status(400).json({
+            result: false,
+            msg: `Input error`
+        })
+    }
+
     const newRest = new Restaurant(
         uuid.v4(),
         req.body.name,
@@ -50,6 +63,13 @@ router.post('/createNewRestaurant', (req, res) => {
 
 router.post('/getRestaurantByID', (req, res) => {
     const id = req.body.restaurant_id
+    if(!id){
+        console.log(`Input error`)
+        res.status(400).json({
+            result: false,
+            msg: `Input error`
+        })
+    }
     DAO.getRestaurantByID(id).then((docSnapshot) => {
         if (docSnapshot.data()) {
             console.log(docSnapshot.data())
@@ -72,6 +92,13 @@ router.post('/getRestaurantByID', (req, res) => {
 
 router.post('/getRestaurantByName', (req, res) => {
     const name = req.body.name
+    if(!name){
+        console.log(`Input error`)
+        res.status(400).json({
+            result: false,
+            msg: `Input error`
+        })
+    }
     DAO.getRestaurantByName(name).then((docSnapshot) => {
         if (!docSnapshot.empty) {
             const docList = []
@@ -118,6 +145,21 @@ router.get('/getAllRestaurant', (req, res) => {
 })
 
 router.patch('/updateRestaurant', (req, res) => {
+    if(!req.body.restaurant_id||
+        !req.body.name||
+        !req.body.description||
+        !req.body.location||
+        !req.body.open_time||
+        !req.body.close_time||
+        !req.body.status||
+        !req.body.owner
+    ){
+        console.log(`Input error`)
+        res.status(400).json({
+            result: false,
+            msg: `Input error`
+        })
+    }
     const newRest = new Restaurant(
         req.body.restaurant_id,
         req.body.name,
@@ -145,6 +187,13 @@ router.patch('/updateRestaurant', (req, res) => {
 router.patch("/updateRestaurantStatus", (req, res) => {
     const restID = req.body.restaurant_id
     const status = req.body.status
+    if(!restID || !status){
+        console.log(`Input error`)
+        res.status(400).json({
+            result: false,
+            msg: `Input error`
+        })
+    }
     DAO.updateRestaurantStatus(restID, status).then(() => {
         res.status(200).json({
             result: true,
@@ -161,6 +210,13 @@ router.patch("/updateRestaurantStatus", (req, res) => {
 
 router.post('/getAllRestaurantByStatus', (req, res) => {
     const status = req.body.status
+    if(!status){
+        console.log(`Input error`)
+        res.status(400).json({
+            result: false,
+            msg: `Input error`
+        })
+    }
     DAO.getAllRestaurantByStatus(status).then((docSnapshot) => {
         if (!docSnapshot.empty) {
             const docList = []
@@ -185,6 +241,13 @@ router.post('/getAllRestaurantByStatus', (req, res) => {
 
 router.post('/getRestaurantImage', (req, res) => {
     const restID = req.body.restaurant_id
+    if (!restID){
+        console.log(`Input error`)
+        res.status(400).json({
+            result: false,
+            msg: `Input error`
+        })
+    }
     DAO.getRestaurantImage(restID).then((url)=>{
         res.status(200).json({
             url: url[0]
