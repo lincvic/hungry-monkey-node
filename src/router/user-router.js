@@ -8,12 +8,7 @@ router.post('/createUser', (req, res) => {
     if(!req.body.first_name||
         !req.body.last_name||
         !req.body.role||
-        !req.body.deliver_status||
-        !req.body.address_first_line||
-        !req.body.address_second_line||
-        !req.body.city||
-        !req.body.country||
-        !req.body.postcode
+        !req.body.uid
     ){
         console.log(`Input error`)
         res.status(400).json({
