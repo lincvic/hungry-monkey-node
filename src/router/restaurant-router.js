@@ -9,12 +9,12 @@ const config = require("../CONFIG")
 const uuid = require('uuid')
 
 router.post('/createNewRestaurant', (req, res) => {
-    if(!req.body.name||
-    !req.body.description||
-    !req.body.location||
-    !req.body.open_time||
-    !req.body.close_time||
-    !req.body.owner){
+    if (!req.body.name ||
+        !req.body.description ||
+        !req.body.location ||
+        !req.body.open_time ||
+        !req.body.close_time ||
+        !req.body.owner) {
         console.log(`Input error`)
         res.status(400).json({
             result: false,
@@ -63,7 +63,7 @@ router.post('/createNewRestaurant', (req, res) => {
 
 router.post('/getRestaurantByID', (req, res) => {
     const id = req.body.restaurant_id
-    if(!id){
+    if (!id) {
         console.log(`Input error`)
         res.status(400).json({
             result: false,
@@ -92,7 +92,7 @@ router.post('/getRestaurantByID', (req, res) => {
 
 router.post('/getRestaurantByName', (req, res) => {
     const name = req.body.name
-    if(!name){
+    if (!name) {
         console.log(`Input error`)
         res.status(400).json({
             result: false,
@@ -145,15 +145,15 @@ router.get('/getAllRestaurant', (req, res) => {
 })
 
 router.patch('/updateRestaurant', (req, res) => {
-    if(!req.body.restaurant_id||
-        !req.body.name||
-        !req.body.description||
-        !req.body.location||
-        !req.body.open_time||
-        !req.body.close_time||
-        !req.body.status||
+    if (!req.body.restaurant_id ||
+        !req.body.name ||
+        !req.body.description ||
+        !req.body.location ||
+        !req.body.open_time ||
+        !req.body.close_time ||
+        !req.body.status ||
         !req.body.owner
-    ){
+    ) {
         console.log(`Input error`)
         res.status(400).json({
             result: false,
@@ -187,7 +187,7 @@ router.patch('/updateRestaurant', (req, res) => {
 router.patch("/updateRestaurantStatus", (req, res) => {
     const restID = req.body.restaurant_id
     const status = req.body.status
-    if(!restID || !status){
+    if (!restID || !status) {
         console.log(`Input error`)
         res.status(400).json({
             result: false,
@@ -210,7 +210,7 @@ router.patch("/updateRestaurantStatus", (req, res) => {
 
 router.post('/getAllRestaurantByStatus', (req, res) => {
     const status = req.body.status
-    if(!status){
+    if (!status) {
         console.log(`Input error`)
         res.status(400).json({
             result: false,
@@ -241,17 +241,31 @@ router.post('/getAllRestaurantByStatus', (req, res) => {
 
 router.post('/getRestaurantImage', (req, res) => {
     const restID = req.body.restaurant_id
-    if (!restID){
+    if (!restID) {
         console.log(`Input error`)
         res.status(400).json({
             result: false,
             msg: `Input error`
         })
     }
-    DAO.getRestaurantImage(restID).then((url)=>{
-        res.status(200).json({
-            url: url[0]
+
+    DAO.checkRestaurantIDExist(restID).then((it) => {
+        const docList = []
+        it.forEach((doc) => {
+            docList.push(doc.data())
         })
+        if (docList[0]) {
+            DAO.getRestaurantImage(restID).then((url) => {
+                res.status(200).json({
+                    url: url[0]
+                })
+            })
+        }else{
+            res.status(400).json({
+                result: false,
+                msg: `Input error`
+            })
+        }
     })
 
 

@@ -12,6 +12,11 @@ class RestaurantDAO{
         return await doc.get()
     }
 
+    async checkRestaurantIDExist(id){
+        const doc = reference.where('restaurant_id', '==', id.toString())
+        return await doc.get()
+    }
+
     async createRestaurant(Rest){
         const doc = reference.doc(Rest.restaurant_id.toString())
         return await doc.set(util.parseJSON(Rest))
