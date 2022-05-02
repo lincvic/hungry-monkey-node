@@ -22,44 +22,46 @@ router.post('/createNewFood', (req, res) => {
             result: false,
             msg: `Input error`
         })
-    }
-    DAO.checkFoodNameExist(restID, req.body.food_name).then((it) => {
-        if (it.empty) {
-            restaurantDAO.getRestaurantByID(restID).then((docSnapshot) => {
-                const restName = util.parseJSON(docSnapshot.data())
-                const newFood = new Food(
-                    uuid.v4(),
-                    req.body.food_name,
-                    req.body.food_price,
-                    req.body.food_description,
-                    restName.name,
-                    req.body.food_type
-                )
-                DAO.addNewFood(restID, newFood).then(() => {
-                    res.status(200).json({
-                        result: true,
-                        msg: `Food ${newFood.food_name} added to menu`
+    }else {
+        DAO.checkFoodNameExist(restID, req.body.food_name).then((it) => {
+            if (it.empty) {
+                restaurantDAO.getRestaurantByID(restID).then((docSnapshot) => {
+                    const restName = util.parseJSON(docSnapshot.data())
+                    const newFood = new Food(
+                        uuid.v4(),
+                        req.body.food_name,
+                        req.body.food_price,
+                        req.body.food_description,
+                        restName.name,
+                        req.body.food_type
+                    )
+                    DAO.addNewFood(restID, newFood).then(() => {
+                        res.status(200).json({
+                            result: true,
+                            msg: `Food ${newFood.food_name} added to menu`
+                        })
+                    }).catch(err => {
+                        console.log(err.message)
+                        res.status(400).json({
+                            result: false,
+                            msg: `Food ${newFood.food_name} added failed`
+                        })
                     })
-                }).catch(err => {
-                    console.log(err.message)
+                }).catch(() => {
                     res.status(400).json({
                         result: false,
-                        msg: `Food ${newFood.food_name} added failed`
+                        msg: `Restaurant ${restID} not found`
                     })
                 })
-            }).catch(() => {
+            } else {
                 res.status(400).json({
                     result: false,
-                    msg: `Restaurant ${restID} not found`
+                    msg: `Food ${req.body.food_name} already exist`
                 })
-            })
-        } else {
-            res.status(400).json({
-                result: false,
-                msg: `Food ${req.body.food_name} already exist`
-            })
-        }
-    })
+            }
+        })
+    }
+
 })
 
 router.patch('/updateFood', (req, res) => {
@@ -71,37 +73,37 @@ router.patch('/updateFood', (req, res) => {
             result: false,
             msg: `Input error`
         })
-    }
+    }else{
+        restaurantDAO.getRestaurantByID(restID).then((docSnapshot) => {
+            const restName = util.parseJSON(docSnapshot.data())
+            const newFood = new Food(
+                req.body.food_id,
+                req.body.food_name,
+                req.body.food_price,
+                req.body.food_description,
+                restName.name,
+                req.body.food_type
+            )
 
-    restaurantDAO.getRestaurantByID(restID).then((docSnapshot) => {
-        const restName = util.parseJSON(docSnapshot.data())
-        const newFood = new Food(
-            req.body.food_id,
-            req.body.food_name,
-            req.body.food_price,
-            req.body.food_description,
-            restName.name,
-            req.body.food_type
-        )
-
-        DAO.updateFood(restID, newFood).then(() => {
-            res.status(200).json({
-                result: true,
-                msg: `Food ${newFood.food_name} updated`
+            DAO.updateFood(restID, newFood).then(() => {
+                res.status(200).json({
+                    result: true,
+                    msg: `Food ${newFood.food_name} updated`
+                })
+            }).catch(err => {
+                console.log(err.message)
+                res.status(400).json({
+                    result: false,
+                    msg: `Food ${newFood.food_name} update failed`
+                })
             })
-        }).catch(err => {
-            console.log(err.message)
+        }).catch(() => {
             res.status(400).json({
                 result: false,
-                msg: `Food ${newFood.food_name} update failed`
+                msg: `Restaurant ${restID} not found`
             })
         })
-    }).catch(() => {
-        res.status(400).json({
-            result: false,
-            msg: `Restaurant ${restID} not found`
-        })
-    })
+    }
 })
 
 router.post('/getAllFoodByRestaurantID', (req, res)=>{
@@ -112,21 +114,23 @@ router.post('/getAllFoodByRestaurantID', (req, res)=>{
             result: false,
             msg: `Input error`
         })
+    }else {
+        DAO.getAllFoodByRestaurantID(restID).then((docSnapshot) =>{
+            if(docSnapshot){
+                const foodList = []
+                docSnapshot.forEach((it)=>{
+                    foodList.push(it.data())
+                })
+                res.json(foodList)
+            }else {
+                res.status(400).json({
+                    result: false,
+                    msg: `Restaurant ${restID} not found`
+                })
+            }
+        })
     }
-    DAO.getAllFoodByRestaurantID(restID).then((docSnapshot) =>{
-        if(docSnapshot){
-            const foodList = []
-            docSnapshot.forEach((it)=>{
-                foodList.push(it.data())
-            })
-            res.json(foodList)
-        }else {
-            res.status(400).json({
-                result: false,
-                msg: `Restaurant ${restID} not found`
-            })
-        }
-    })
+
 })
 
 router.delete('/deleteFood', (req,res)=>{
@@ -139,32 +143,23 @@ router.delete('/deleteFood', (req,res)=>{
             result: false,
             msg: `Input error`
         })
-    }
-
-    if (!restID || !foodID){
-        console.log(`Input error`)
-        res.status(400).json({
-            result: false,
-            msg: `Input error`
-        })
-    }
-
-    DAO.checkFoodIDExist(restID, foodID).then((docSnapshot)=>{
-        if(docSnapshot.data()){
-            DAO.deleteFoodByFoodID(restID, foodID).then(()=>{
+    }else {
+        DAO.checkFoodIDExist(restID, foodID).then((docSnapshot)=>{
+            if(docSnapshot.data()){
+                DAO.deleteFoodByFoodID(restID, foodID).then(()=>{
                     res.status(200).json({
                         result: true,
                         msg: `Restaurant ${restID} Food ${foodID} deleted`
                     })
-            })
-        }else {
-            res.status(400).json({
-                result: false,
-                msg: `Restaurant ${restID} Food ${foodID} not found`
-            })
-        }
-    })
-
+                })
+            }else {
+                res.status(400).json({
+                    result: false,
+                    msg: `Restaurant ${restID} Food ${foodID} not found`
+                })
+            }
+        })
+    }
 
 })
 

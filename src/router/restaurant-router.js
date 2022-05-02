@@ -14,50 +14,53 @@ router.post('/createNewRestaurant', (req, res) => {
         !req.body.location ||
         !req.body.open_time ||
         !req.body.close_time ||
-        !req.body.owner) {
+        !req.body.owner)
+    {
         console.log(`Input error`)
         res.status(400).json({
             result: false,
             msg: `Input error`
         })
-    }
+    }else{
+        const newRest = new Restaurant(
+            uuid.v4(),
+            req.body.name,
+            req.body.description,
+            req.body.location,
+            req.body.open_time,
+            req.body.close_time,
+            "WaitConfirm",
+            req.body.owner
+        )
 
-    const newRest = new Restaurant(
-        uuid.v4(),
-        req.body.name,
-        req.body.description,
-        req.body.location,
-        req.body.open_time,
-        req.body.close_time,
-        "WaitConfirm",
-        req.body.owner
-    )
+        DAO.checkRestaurantNameExist(newRest.name).then((it) => {
+            if (it.empty) {
+                DAO.createRestaurant(newRest).then(() => {
+                    if (config.notificationStatus) {
+                        util.sendEmail2Manager(config.managerEmail, newRest.name)
+                    }
+                    res.status(200).json({
+                        result: true,
+                        msg: `Restaurant ${newRest.name} created`
+                    })
 
-    DAO.checkRestaurantNameExist(newRest.name).then((it) => {
-        if (it.empty) {
-            DAO.createRestaurant(newRest).then(() => {
-                if (config.notificationStatus) {
-                    util.sendEmail2Manager(config.managerEmail, newRest.name)
-                }
-                res.status(200).json({
-                    result: true,
-                    msg: `Restaurant ${newRest.name} created`
+                }).catch(err => {
+                    console.log(err.message)
+                    res.status(400).json({
+                        result: false,
+                        msg: `Restaurant ${newRest.name} create failed`
+                    })
                 })
-
-            }).catch(err => {
-                console.log(err.message)
+            } else {
                 res.status(400).json({
                     result: false,
-                    msg: `Restaurant ${newRest.name} create failed`
+                    msg: `Restaurant ${newRest.name} already exist`
                 })
-            })
-        } else {
-            res.status(400).json({
-                result: false,
-                msg: `Restaurant ${newRest.name} already exist`
-            })
-        }
-    })
+            }
+        })
+    }
+
+
 
 })
 
@@ -69,25 +72,27 @@ router.post('/getRestaurantByID', (req, res) => {
             result: false,
             msg: `Input error`
         })
-    }
-    DAO.getRestaurantByID(id).then((docSnapshot) => {
-        if (docSnapshot.data()) {
-            console.log(docSnapshot.data())
-            res.json(docSnapshot.data())
-        } else {
+    }else {
+        DAO.getRestaurantByID(id).then((docSnapshot) => {
+            if (docSnapshot.data()) {
+                console.log(docSnapshot.data())
+                res.json(docSnapshot.data())
+            } else {
+                res.status(400).json({
+                    result: false,
+                    msg: `Restaurant ${id} is not exist`
+                })
+            }
+
+        }).catch(err => {
+            console.log(err.message)
             res.status(400).json({
                 result: false,
-                msg: `Restaurant ${id} is not exist`
+                msg: `Firebase Error`
             })
-        }
-
-    }).catch(err => {
-        console.log(err.message)
-        res.status(400).json({
-            result: false,
-            msg: `Firebase Error`
         })
-    })
+    }
+
 })
 
 router.post('/getRestaurantByName', (req, res) => {
@@ -98,27 +103,29 @@ router.post('/getRestaurantByName', (req, res) => {
             result: false,
             msg: `Input error`
         })
-    }
-    DAO.getRestaurantByName(name).then((docSnapshot) => {
-        if (!docSnapshot.empty) {
-            const docList = []
-            docSnapshot.forEach((item) => {
-                docList.push(item.data())
-            })
-            res.json(docList)
-        } else {
+    }else {
+        DAO.getRestaurantByName(name).then((docSnapshot) => {
+            if (!docSnapshot.empty) {
+                const docList = []
+                docSnapshot.forEach((item) => {
+                    docList.push(item.data())
+                })
+                res.json(docList)
+            } else {
+                res.status(400).json({
+                    result: false,
+                    msg: `Restaurant ${name} is not exist`
+                })
+            }
+        }).catch(err => {
+            console.log(err.message)
             res.status(400).json({
                 result: false,
-                msg: `Restaurant ${name} is not exist`
+                msg: `Firebase Error`
             })
-        }
-    }).catch(err => {
-        console.log(err.message)
-        res.status(400).json({
-            result: false,
-            msg: `Firebase Error`
         })
-    })
+    }
+
 })
 
 router.get('/getAllRestaurant', (req, res) => {
@@ -159,29 +166,31 @@ router.patch('/updateRestaurant', (req, res) => {
             result: false,
             msg: `Input error`
         })
+    }else {
+        const newRest = new Restaurant(
+            req.body.restaurant_id,
+            req.body.name,
+            req.body.description,
+            req.body.location,
+            req.body.open_time,
+            req.body.close_time,
+            req.body.status,
+            req.body.owner
+        )
+        DAO.updateRestaurantByID(req.body.id, newRest).then(() => {
+            res.status(200).json({
+                result: true,
+                msg: `Restaurant ${newRest.name} updated`
+            })
+        }).catch(err => {
+            console.log(err.message)
+            res.status(400).json({
+                result: false,
+                msg: `Restaurant ${newRest.name} update failed`
+            })
+        })
     }
-    const newRest = new Restaurant(
-        req.body.restaurant_id,
-        req.body.name,
-        req.body.description,
-        req.body.location,
-        req.body.open_time,
-        req.body.close_time,
-        req.body.status,
-        req.body.owner
-    )
-    DAO.updateRestaurantByID(req.body.id, newRest).then(() => {
-        res.status(200).json({
-            result: true,
-            msg: `Restaurant ${newRest.name} updated`
-        })
-    }).catch(err => {
-        console.log(err.message)
-        res.status(400).json({
-            result: false,
-            msg: `Restaurant ${newRest.name} update failed`
-        })
-    })
+
 })
 
 router.patch("/updateRestaurantStatus", (req, res) => {
@@ -193,19 +202,20 @@ router.patch("/updateRestaurantStatus", (req, res) => {
             result: false,
             msg: `Input error`
         })
+    }else {
+        DAO.updateRestaurantStatus(restID, status).then(() => {
+            res.status(200).json({
+                result: true,
+                msg: `Restaurant ${restID} updated to status ${status}`
+            })
+        }).catch((err) => {
+            console.log(err.message)
+            res.status(400).json({
+                result: true,
+                msg: `Restaurant ${restID} updated failed`
+            })
+        })
     }
-    DAO.updateRestaurantStatus(restID, status).then(() => {
-        res.status(200).json({
-            result: true,
-            msg: `Restaurant ${restID} updated to status ${status}`
-        })
-    }).catch((err) => {
-        console.log(err.message)
-        res.status(400).json({
-            result: true,
-            msg: `Restaurant ${restID} updated failed`
-        })
-    })
 })
 
 router.post('/getAllRestaurantByStatus', (req, res) => {
@@ -216,27 +226,29 @@ router.post('/getAllRestaurantByStatus', (req, res) => {
             result: false,
             msg: `Input error`
         })
-    }
-    DAO.getAllRestaurantByStatus(status).then((docSnapshot) => {
-        if (!docSnapshot.empty) {
-            const docList = []
-            docSnapshot.forEach((item) => {
-                docList.push(item.data())
-            })
-            res.json(docList)
-        } else {
+    }else {
+        DAO.getAllRestaurantByStatus(status).then((docSnapshot) => {
+            if (!docSnapshot.empty) {
+                const docList = []
+                docSnapshot.forEach((item) => {
+                    docList.push(item.data())
+                })
+                res.json(docList)
+            } else {
+                res.status(400).json({
+                    result: false,
+                    msg: `Restaurant is empty`
+                })
+            }
+        }).catch(err => {
+            console.log(err.message)
             res.status(400).json({
                 result: false,
-                msg: `Restaurant is empty`
+                msg: `Firebase Error`
             })
-        }
-    }).catch(err => {
-        console.log(err.message)
-        res.status(400).json({
-            result: false,
-            msg: `Firebase Error`
         })
-    })
+    }
+
 })
 
 router.post('/getRestaurantImage', (req, res) => {
@@ -247,28 +259,26 @@ router.post('/getRestaurantImage', (req, res) => {
             result: false,
             msg: `Input error`
         })
-    }
-
-    DAO.checkRestaurantIDExist(restID).then((it) => {
-        const docList = []
-        it.forEach((doc) => {
-            docList.push(doc.data())
-        })
-        if (docList[0]) {
-            DAO.getRestaurantImage(restID).then((url) => {
-                res.status(200).json({
-                    url: url[0]
+    }else {
+        DAO.checkRestaurantIDExist(restID).then((it) => {
+            const docList = []
+            it.forEach((doc) => {
+                docList.push(doc.data())
+            })
+            if (docList[0]) {
+                DAO.getRestaurantImage(restID).then((url) => {
+                    res.status(200).json({
+                        url: url[0]
+                    })
                 })
-            })
-        }else{
-            res.status(400).json({
-                result: false,
-                msg: `Input error`
-            })
-        }
-    })
-
-
+            }else{
+                res.status(400).json({
+                    result: false,
+                    msg: `Input error`
+                })
+            }
+        })
+    }
 })
 
 
