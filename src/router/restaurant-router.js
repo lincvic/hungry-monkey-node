@@ -152,7 +152,8 @@ router.get('/getAllRestaurant', (req, res) => {
 })
 
 router.patch('/updateRestaurant', (req, res) => {
-    if (!req.body.restaurant_id ||
+    const restID = req.body.restaurant_id
+    if (!restID ||
         !req.body.name ||
         !req.body.description ||
         !req.body.location ||
@@ -168,7 +169,7 @@ router.patch('/updateRestaurant', (req, res) => {
         })
     }else {
         const newRest = new Restaurant(
-            req.body.restaurant_id,
+            restID,
             req.body.name,
             req.body.description,
             req.body.location,
@@ -177,7 +178,7 @@ router.patch('/updateRestaurant', (req, res) => {
             req.body.status,
             req.body.owner
         )
-        DAO.updateRestaurantByID(req.body.id, newRest).then(() => {
+        DAO.updateRestaurantByID(restID, newRest).then(() => {
             res.status(200).json({
                 result: true,
                 msg: `Restaurant ${newRest.name} updated`

@@ -37,6 +37,7 @@ class RestaurantDAO{
     }
 
     async updateRestaurantByID(id, Rest){
+        console.log("update id is "+id)
         const doc = reference.doc(id.toString())
         return await doc.set(util.parseJSON(Rest))
     }
