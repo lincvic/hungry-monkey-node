@@ -36,6 +36,11 @@ class MenuDAO{
         return await document.get()
     }
 
+    async getFoodByID(restaurantID, foodID){
+        const document = this.refBuilder(restaurantID)
+        return await document.doc(foodID.toString()).get()
+    }
+
     async deleteFoodByFoodID(restaurantID, foodID){
         const document = this.refBuilder(restaurantID)
         return await document.doc(foodID.toString()).delete()
