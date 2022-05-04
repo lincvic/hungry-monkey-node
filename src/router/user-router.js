@@ -155,6 +155,30 @@ router.post("/getUserByRole", (req, res)=>{
     }
 })
 
+router.patch("/updateDriverStatusByUID", (req, res) =>{
+    const uid = req.body.uid
+    const status = req.body.deliver_status
+    if (!uid || !status){
+        console.log(`Input error`)
+        res.status(400).json({
+            result: false,
+            msg: `Input error`
+        })
+    }else {
+        DAO.updateDriverStatusByUID(uid, status).then(()=>{
+            res.status(200).json({
+                result: true,
+                msg: `User ${uid} status updated to ${status}`
+            })
+        }).catch((e)=>{
+            console.log(e.message)
+            res.status(400).json({
+                result: false,
+                msg: `Firebase error`
+            })
+        })
+    }
+})
 
 
 module.exports = router

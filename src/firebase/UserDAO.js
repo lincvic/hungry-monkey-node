@@ -25,6 +25,11 @@ class UserDAO{
         return await doc.get()
     }
 
+    async updateDriverStatusByUID(uid, status){
+        const doc = ref.doc(uid.toString())
+        return await doc.update({deliver_status: status.toString()})
+    }
+
 }
 
 module.exports = UserDAO
