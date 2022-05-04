@@ -24,7 +24,7 @@ router.post('/placeNewOrder', (req, res) => {
             result: false,
             msg: `Input error`
         })
-    }else {
+    } else {
         userDAO.getUserByUID(req.body.user_uid).then((it) => {
             const user = util.parseJSON(it.data())
             const newOrder = new Order(
@@ -77,8 +77,37 @@ router.post('/getOrderByRestaurantName', (req, res) => {
                 result: false,
                 msg: `Input error`
             })
-        }else{
+        } else {
             DAO.getOrderByRestaurantName(restName).then((docSnapshot) => {
+                const orderList = []
+                docSnapshot.forEach((it) => {
+                    orderList.push(it.data())
+                })
+                res.json(orderList)
+            }).catch((err) => {
+                console.log(err.message)
+                res.status(400).json({
+                    result: false,
+                    msg: `Restaurant ${restName} found failed`
+                })
+            })
+        }
+
+    }
+)
+
+router.post('/getOrderByRestaurantNameAndStatus', (req, res) => {
+
+        const restName = req.body.restaurant_name
+        const status = req.body.order_status
+        if (!restName || !status) {
+            console.log(`Input error`)
+            res.status(400).json({
+                result: false,
+                msg: `Input error`
+            })
+        } else {
+            DAO.getOrderByRestaurantNameAndStatus(restName, status).then((docSnapshot) => {
                 const orderList = []
                 docSnapshot.forEach((it) => {
                     orderList.push(it.data())
@@ -104,7 +133,7 @@ router.post('/getOrderByUserUID', (req, res) => {
                 result: false,
                 msg: `Input error`
             })
-        }else {
+        } else {
             console.log(uid)
             DAO.getOrderByUserUid(uid).then((docSnapshot) => {
                 const orderList = []
@@ -132,7 +161,7 @@ router.post('/getOrderByDeliverEmail', (req, res) => {
                 result: false,
                 msg: `Input error`
             })
-        }else {
+        } else {
             DAO.getOrderByDeliverUID(email).then((docSnapshot) => {
                 const orderList = []
                 docSnapshot.forEach((it) => {
@@ -155,13 +184,13 @@ router.post('/getOrderByDeliverEmail', (req, res) => {
 router.patch("/updateOrderStatus", (req, res) => {
     const orderID = req.body.order_id
     const status = req.body.order_status
-    if (!orderID || !status){
+    if (!orderID || !status) {
         console.log(`Input error`)
         res.status(400).json({
             result: false,
             msg: `Input error`
         })
-    }else {
+    } else {
         DAO.updateOrderStatus(orderID, status).then(() => {
             res.status(200).json({
                 result: true,
@@ -181,13 +210,13 @@ router.patch("/updateOrderStatus", (req, res) => {
 router.patch("/assignOrder2Deliver", (req, res) => {
     const orderID = req.body.order_id
     const deliverEmail = req.body.order_deliver_by
-    if (!orderID || !deliverEmail){
+    if (!orderID || !deliverEmail) {
         console.log(`Input error`)
         res.status(400).json({
             result: false,
             msg: `Input error`
         })
-    }else {
+    } else {
         DAO.assignOrderDeliver(orderID, deliverEmail).then(() => {
             DAO.updateOrderStatus(orderID, "delivering").then(() => {
                 if (config.notificationStatus) {

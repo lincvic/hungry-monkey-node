@@ -14,6 +14,12 @@ class OrderDAO{
         return await doc.get()
     }
 
+    async getOrderByRestaurantNameAndStatus(name, status){
+        const doc = ref.where('restaurant_name', '==', name.toString())
+            .where('order_status', '==', status.toString())
+        return await doc.get()
+    }
+
     async getOrderByUserUid(uid){
         const doc = ref.where('user_uid', '==', uid.toString())
         return await doc.get()
