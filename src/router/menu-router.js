@@ -128,8 +128,6 @@ router.patch('/updateFood', (req, res) => {
                         }).catch((e) => {
                             console.log("Sending Notification failed when update food during get order by restaurant name: " + e)
                         })
-
-
                     }
 
                 }).catch(err => {

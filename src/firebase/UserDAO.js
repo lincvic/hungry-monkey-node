@@ -20,6 +20,11 @@ class UserDAO{
         return await doc.set(util.parseJSON(User))
     }
 
+    async updateUserVerificationStatus(uid, status){
+        const doc = ref.doc(uid.toString())
+        return await doc.update({status: status.toString()})
+    }
+
     async getUserByRole(role){
         const doc = ref.where('role', '==', role.toString())
         return await doc.get()

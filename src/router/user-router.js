@@ -3,6 +3,8 @@ const router = express.Router()
 const userDAO = require('../firebase/UserDAO')
 const User = require('../firebase/DTO/User')
 const DAO = new userDAO()
+const utilClass = require("../util/common-util")
+const util = new utilClass()
 
 router.post('/createUser', (req, res) => {
     if(!req.body.first_name||
@@ -16,6 +18,7 @@ router.post('/createUser', (req, res) => {
             msg: `Input error`
         })
     }else{
+        const status = req.body.status ? req.body.status : "unconfirmed"
         DAO.getUserByUID(req.body.uid).then((it) =>{
             if(!it.data()){
                 const newUser = new User(req.body.uid,
@@ -28,7 +31,8 @@ router.post('/createUser', (req, res) => {
                     req.body.address_second_line,
                     req.body.city,
                     req.body.country,
-                    req.body.postcode
+                    req.body.postcode,
+                    status
                 )
                 DAO.createNewUser(newUser).then(() => {
                     res.status(200).json({
@@ -50,8 +54,6 @@ router.post('/createUser', (req, res) => {
             }
         })
     }
-
-
 })
 
 router.post('/getUserByUID', (req, res) => {
@@ -176,6 +178,56 @@ router.patch("/updateDriverStatusByUID", (req, res) =>{
                 result: false,
                 msg: `Firebase error`
             })
+        })
+    }
+})
+
+router.get("/confirmEmail", (req, res) =>{
+    const encUID = req.query.uid
+    const encIV = req.query.key
+    const hash = {
+        iv: encIV,
+        content: encUID
+    }
+    const uid = util.decrypt(hash)
+    console.log(`Decrypted UID is ${uid}`)
+    const status = "confirmed"
+    if (!uid || !status){
+        console.log(`Input error`)
+        res.status(400).json({
+            result: false,
+            msg: `Input error`
+        })
+    }else{
+        DAO.updateUserVerificationStatus(uid, status).then(()=>{
+            res.status(200).json({
+                result: true,
+                msg: `User ${uid} email confirmed`
+            })
+        }).catch((e)=>{
+            console.log(e.message)
+            res.status(400).json({
+                result: false,
+                msg: `Firebase error`
+            })
+        })
+    }
+})
+
+router.post("/verifyEmail", (req, res) =>{
+    const email = req.body.email
+    const uid = req.body.uid
+    if (!email|| !uid){
+        console.log(`Input error`)
+        res.status(400).json({
+            result: false,
+            msg: `Input error`
+        })
+    }else {
+        util.sendVerificationEmail(email, uid)
+        res.status(200).json({
+            result: true,
+            msg: `Email sent to ${email}`
         })
     }
 })

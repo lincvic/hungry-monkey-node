@@ -6,7 +6,8 @@ const CONFIG = {
     mailAccount: "hungry-monkey-team@outlook.com",
     mailPSW: "Qwerty123!@#",
     managerEmail: "lincvic@yahoo.com",
-    notificationStatus: false
+    notificationStatus: false,
+    KEY: "aOVH6sdmpN1jcRIqCs7rdxs01lwHzfr3"
 }
 
 

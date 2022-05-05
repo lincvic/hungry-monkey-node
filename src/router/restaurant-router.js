@@ -60,8 +60,6 @@ router.post('/createNewRestaurant', (req, res) => {
         })
     }
 
-
-
 })
 
 router.post('/getRestaurantByID', (req, res) => {
