@@ -65,7 +65,7 @@ class CommonUtil {
         const link = this.linkBuilder(uid)
         const subject = `Please Verify Your Email`
         const htmlContent = `<p>Hi:</p></br><p>Please click the link follow verify your email for Hungry-Monkey</p></br></br><a href = ${link}>Click Here To Verify</a></br></br></br><p>Thanks</p><p>Hungry Monkey Team</p>`
-        this.sendEmail(email, subject, htmlContent)
+        //this.sendEmail(email, subject, htmlContent)
         console.log(link)
     }
 

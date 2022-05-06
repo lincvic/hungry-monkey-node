@@ -189,29 +189,39 @@ router.get("/confirmEmail", (req, res) =>{
         iv: encIV,
         content: encUID
     }
-    const uid = util.decrypt(hash)
-    console.log(`Decrypted UID is ${uid}`)
-    const status = "confirmed"
-    if (!uid || !status){
-        console.log(`Input error`)
-        res.status(400).json({
-            result: false,
-            msg: `Input error`
-        })
-    }else{
-        DAO.updateUserVerificationStatus(uid, status).then(()=>{
-            res.status(200).json({
-                result: true,
-                msg: `User ${uid} email confirmed`
-            })
-        }).catch((e)=>{
-            console.log(e.message)
+    try {
+        const uid = util.decrypt(hash)
+        console.log(`Decrypted UID is ${uid}`)
+        const status = "confirmed"
+        if (!uid || !status){
+            console.log(`Input error`)
             res.status(400).json({
                 result: false,
-                msg: `Firebase error`
+                msg: `Input error`
             })
+        }else{
+            DAO.updateUserVerificationStatus(uid, status).then(()=>{
+                res.status(200).json({
+                    result: true,
+                    msg: `User ${uid} email confirmed`
+                })
+            }).catch((e)=>{
+                console.log(e.message)
+                res.status(400).json({
+                    result: false,
+                    msg: `DO NOT MODIFY THE CONTENT OF LINK`
+                })
+            })
+        }
+    }catch (e){
+        console.log(e.message)
+        return res.status(400).json({
+            result: false,
+            msg: `DO NOT MODIFY THE CONTENT OF LINK`
         })
     }
+
+
 })
 
 router.post("/verifyEmail", (req, res) =>{
