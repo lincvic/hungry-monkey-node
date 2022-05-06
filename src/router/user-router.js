@@ -232,5 +232,48 @@ router.post("/verifyEmail", (req, res) =>{
     }
 })
 
+router.post('/checkUserStatus', (req, res)=>{
+    const email = req.body.email
+    if (!email){
+        console.log(`checkUserStatus Input error`)
+        res.status(400).json({
+            result: false,
+            msg: `Input error`
+        })
+    }else{
+        DAO.getUserByEmail(email).then((it)=>{
+            const userList = []
+            it.forEach((doc)=>{
+                userList.push(doc.data())
+            })
+            console.log("User Email is "+ email)
+            if (userList[0].status){
+                if (userList[0].status !== "unconfirmed"){
+                    res.status(200).json({
+                        result: true,
+                        msg: `Email verified`
+                    })
+                }else {
+                    res.status(200).json({
+                        result: false,
+                        msg: `Email not verified`
+                    })
+                }
+            }else {
+                res.status(400).json({
+                    result: false,
+                    msg: `Input error`
+                })
+            }
+        }).catch((e)=>{
+            console.log(e.message)
+            res.status(400).json({
+                result: false,
+                msg: `Firebase error`
+            })
+        })
+    }
+})
+
 
 module.exports = router

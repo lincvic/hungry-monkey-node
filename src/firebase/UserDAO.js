@@ -25,6 +25,12 @@ class UserDAO{
         return await doc.update({status: status.toString()})
     }
 
+    async getUserByEmail(email){
+        const doc = ref.where('email', '==', email.toString())
+        return await doc.get()
+    }
+
+
     async getUserByRole(role){
         const doc = ref.where('role', '==', role.toString())
         return await doc.get()
