@@ -13,11 +13,17 @@ const config = require('../CONFIG')
 const uuid = require('uuid')
 
 router.post('/placeNewOrder', (req, res) => {
-    if (!req.body.user_uid ||
-        !req.body.restaurant_name ||
-        !req.body.food_ordered ||
-        !req.body.order_placed_time ||
-        !req.body.order_price
+    const user_uid = req.body.user_uid
+    const restaurant_name = req.body.restaurant_name
+    const food_ordered = req.body.food_ordered
+    const order_placed_time = req.body.order_placed_time
+    const order_price = req.body.order_price
+
+    if (!user_uid ||
+        !restaurant_name ||
+        !food_ordered ||
+        !order_placed_time ||
+        !order_price
     ) {
         console.log(`Input error`)
         res.status(400).json({
@@ -25,43 +31,63 @@ router.post('/placeNewOrder', (req, res) => {
             msg: `Input error`
         })
     } else {
-        userDAO.getUserByUID(req.body.user_uid).then((it) => {
+        userDAO.getUserByUID(user_uid).then((it) => {
             const user = util.parseJSON(it.data())
-            const newOrder = new Order(
-                uuid.v4(),
-                req.body.user_uid,
-                user.email,
-                req.body.restaurant_name,
-                req.body.food_ordered,
-                "placed",
-                req.body.order_placed_time,
-                "",
-                "",
-                req.body.order_price
-            )
-
-            DAO.placeNewOrder(newOrder).then(() => {
-                if (config.notificationStatus) {
-                    restDAO.getRestaurantByName(newOrder.restaurant_name).then((it) => {
-                        const list = []
-                        it.forEach((doc) => {
-                            list.push(doc.data())
+            restDAO.getRestaurantByName(restaurant_name).then((restData) => {
+                let restList = []
+                restData.forEach((item) => {
+                    restList.push(item.data())
+                })
+                const rest = util.parseJSON(restList[0])
+                const newOrder = new Order(
+                    uuid.v4(),
+                    user_uid,
+                    user.email,
+                    restaurant_name,
+                    food_ordered,
+                    "placed",
+                    order_placed_time,
+                    "",
+                    "",
+                    order_price,
+                    rest.location,
+                    user.postcode
+                )
+                DAO.placeNewOrder(newOrder).then(() => {
+                    if (config.notificationStatus) {
+                        restDAO.getRestaurantByName(newOrder.restaurant_name).then((it) => {
+                            const list = []
+                            it.forEach((doc) => {
+                                list.push(doc.data())
+                            })
+                            const email = list[0].owner
+                            console.log(`Rest ! name is ${email}`)
+                            util.sendEmail2RestaurantOwner(email)
                         })
-                        const email = list[0].owner
-                        console.log(`Rest ! name is ${email}`)
-                        util.sendEmail2RestaurantOwner(email)
+                    }
+                    res.status(200).json({
+                        result: true,
+                        msg: `Order ${newOrder.order_id} Placed`
                     })
-                }
-                res.status(200).json({
-                    result: true,
-                    msg: `Order ${newOrder.order_id} Placed`
+                }).catch((err) => {
+                    console.log(err.message)
+                    res.status(400).json({
+                        result: false,
+                        msg: `Order ${newOrder.order_id} Place Failed`
+                    })
                 })
             }).catch((err) => {
                 console.log(err.message)
                 res.status(400).json({
                     result: false,
-                    msg: `Order ${newOrder.order_id} Place Failed`
+                    msg: `Firebase err`
                 })
+            })
+        }).catch((err) => {
+            console.log(err.message)
+            res.status(400).json({
+                result: false,
+                msg: `Firebase err`
             })
         })
     }
@@ -97,7 +123,6 @@ router.post('/getOrderByRestaurantName', (req, res) => {
 )
 
 router.post('/getOrderByRestaurantNameAndStatus', (req, res) => {
-
         const restName = req.body.restaurant_name
         const status = req.body.order_status
         if (!restName || !status) {
@@ -168,7 +193,10 @@ router.post('/getOrderByDeliverEmail', (req, res) => {
                     console.log(it.data())
                     orderList.push(it.data())
                 })
+
                 res.json(orderList)
+
+
             }).catch((err) => {
                 console.log(err.message)
                 res.status(400).json({

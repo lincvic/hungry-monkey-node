@@ -19,7 +19,6 @@ const logger = pino({
         levelFirst: true,
         translateTime: 'yyyy-dd-mm, h:MM:ss TT',
     }
-
     }
 )
 

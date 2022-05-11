@@ -220,8 +220,6 @@ router.get("/confirmEmail", (req, res) =>{
             msg: `DO NOT MODIFY THE CONTENT OF LINK`
         })
     }
-
-
 })
 
 router.post("/verifyEmail", (req, res) =>{

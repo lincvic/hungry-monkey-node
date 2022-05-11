@@ -1,6 +1,7 @@
 class User{
     constructor(uid, email, first_name, last_name, role, deliver_status,
-                address_first_line, address_second_line, city, country, postcode, status) {
+                address_first_line, address_second_line, city, country,
+                postcode, status) {
         this.uid = uid
         this.email =email
         this.first_name= first_name
