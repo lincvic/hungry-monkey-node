@@ -106,7 +106,8 @@ router.patch('/updateUserByUID', (req, res) =>{
             req.body.address_second_line,
             req.body.city,
             req.body.country,
-            req.body.postcode
+            req.body.postcode,
+            req.body.status
         )
         DAO.updateUserByUID(uid, newUser).then(() => {
             res.status(200).json({
