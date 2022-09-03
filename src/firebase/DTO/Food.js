@@ -7,7 +7,6 @@ class Food {
         this.food_restaurant = food_restaurant
         this.food_type = food_type
     }
-
 }
 
 module.exports = Food

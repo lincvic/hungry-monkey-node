@@ -1,12 +1,12 @@
 const CONFIG = {
     port: process.env.PORT || 8888,
-    mailHost:'smtp.office365.com',
-    mailService: "Outlook365", //https://nodemailer.com/smtp/well-known/
+    mailHost: 'smtp.gmail.com',
+    mailService: "Gmail", //https://nodemailer.com/smtp/well-known/
     mailPort: 587,
-    mailAccount: "hungry-monkey-team@outlook.com",
+    mailAccount: "hungry.monkey.team.real@gmail.com",
     mailPSW: "Qwerty123!@#",
     managerEmail: "lincvic@yahoo.com",
-    notificationStatus: false,
+    notificationStatus: true,
     KEY: "aOVH6sdmpN1jcRIqCs7rdxs01lwHzfr3"
 }
 
